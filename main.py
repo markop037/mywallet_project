@@ -1,6 +1,7 @@
 import tkinter as tk
 import matplotlib.pyplot as plt
 import pyodbc
+import bcrypt
 
 conn = pyodbc.connect(
     "Driver={ODBC Driver 17 for SQL Server};"
@@ -10,6 +11,12 @@ conn = pyodbc.connect(
 )
 
 cursor = conn.cursor()
+
+
+def hash_password(password):
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(password.encode("utf-8"), salt)
+    return hashed_password.decode("utf-8")
 
 
 class Register:
@@ -98,9 +105,11 @@ class Register:
             self.error_label.config(text="Username already exists!\nPlease choose another one.")
             return
 
+        hashed_password = hash_password(password)
+
         try:
             cursor.execute("INSERT INTO Users (FirstName, LastName, Username, Password, Email) "
-                           "VALUES (?, ?, ?, ?, ?)", first_name, last_name, username, password, email)
+                           "VALUES (?, ?, ?, ?, ?)", first_name, last_name, username, hashed_password, email)
             conn.commit()
             self.error_label.configure(text="You have successfully registered",
                                        font=("Arial", 10), fg='green', background='Navy Blue')
@@ -156,10 +165,17 @@ class Login:
     def checkUser(self):
         username = self.username_entry.get()
         password = self.password_entry.get()
-        cursor.execute("SELECT * FROM Users WHERE Username=? AND Password=?", username, password)
+        cursor.execute("SELECT Password FROM Users WHERE Username=?", username)
         result = cursor.fetchone()
         if result:
-            self.root.destroy()
+            hashed_password = result[0]
+
+            if bcrypt.checkpw(password.encode("utf-8"), hashed_password.encode("utf-8")):
+                self.root.destroy()
+            else:
+                if not self.label_visible.get():
+                    self.error_label.pack(pady=5)
+                    self.label_visible.set(True)
         else:
             if not self.label_visible.get():
                 self.error_label.pack(pady=5)
