@@ -32,7 +32,7 @@ class Register:
         self.root.geometry(f"{320}x{540}+{x_coordinate}+{y_coordinate}")
 
         self.myWallet_label = tk.Label(self.root, text="MyWallet",
-                                      font=("Arial", 15), fg='white', background='Navy Blue')
+                                       font=("Arial", 15), fg='white', background='Navy Blue')
         self.myWallet_label.pack(pady=30)
 
         self.firstName_label = tk.Label(self.root, text="First Name",
@@ -42,13 +42,13 @@ class Register:
         self.firstName_entry.pack()
 
         self.lastName_label = tk.Label(self.root, text="Last Name",
-                                        font=("Arial", 12), fg='white', background='Navy Blue')
+                                       font=("Arial", 12), fg='white', background='Navy Blue')
         self.lastName_label.pack(pady=5)
         self.lastName_entry = tk.Entry(self.root, width=30)
         self.lastName_entry.pack()
 
         self.username_label = tk.Label(self.root, text="Username*",
-                                        font=("Arial", 12), fg='white', background='Navy Blue')
+                                       font=("Arial", 12), fg='white', background='Navy Blue')
         self.username_label.pack(pady=5)
         self.username_entry = tk.Entry(self.root, width=30)
         self.username_entry.pack()
@@ -66,7 +66,7 @@ class Register:
         self.confirm_password_entry.pack()
 
         self.email_label = tk.Label(self.root, text="Email",
-                                               font=("Arial", 12), fg='white', background='Navy Blue')
+                                    font=("Arial", 12), fg='white', background='Navy Blue')
         self.email_label.pack(pady=5)
         self.email_entry = tk.Entry(self.root, width=30)
         self.email_entry.pack()
@@ -134,18 +134,18 @@ class Login:
         self.welcome_label.pack(pady=30)
 
         self.username_label = tk.Label(self.root, text="Username", font=("Arial", 11),
-                                    fg='white', background='Navy Blue')
+                                       fg='white', background='Navy Blue')
         self.username_label.pack(pady=5)
         self.username_entry = tk.Entry(self.root, width=30)
         self.username_entry.pack()
 
         self.password_label = tk.Label(self.root, text="Password", font=("Arial", 11),
-                                      fg='white', background='Navy Blue')
+                                       fg='white', background='Navy Blue')
         self.password_label.pack(pady=5)
         self.password_entry = tk.Entry(self.root, width=30, show='•')
         self.password_entry.pack()
 
-        self.logIn_button = tk.Button(self.root, text="Log In", command=self.checkUser, font=("Arial", 12))
+        self.logIn_button = tk.Button(self.root, text="Log In", command=self.check_user, font=("Arial", 12))
         self.logIn_button.pack(pady=20)
 
         self.label_visible = tk.BooleanVar(value=False)
@@ -154,15 +154,16 @@ class Login:
                                     font=("Arial", 10), fg='red', background='Navy Blue')
 
         self.signUp_label = tk.Label(self.root, text="Don't have an account?",
-                                               font=("Arial", 12), fg='white', background='Navy Blue')
+                                     font=("Arial", 12), fg='white', background='Navy Blue')
         self.signUp_label.pack()
 
-        self.signUp_button = tk.Button(self.root, text="Sign up", font=("Arial", 12), command=self.show_registration_form)
+        self.signUp_button = tk.Button(self.root, text="Sign up", font=("Arial", 12),
+                                       command=self.show_registration_form)
         self.signUp_button.pack(pady=5)
 
         self.root.mainloop()
 
-    def checkUser(self):
+    def check_user(self):
         username = self.username_entry.get()
         password = self.password_entry.get()
         cursor.execute("SELECT Password FROM Users WHERE Username=?", username)
@@ -172,6 +173,7 @@ class Login:
 
             if bcrypt.checkpw(password.encode("utf-8"), hashed_password.encode("utf-8")):
                 self.root.destroy()
+                Home(username)
             else:
                 if not self.label_visible.get():
                     self.error_label.pack(pady=5)
@@ -185,7 +187,113 @@ class Login:
         Register(self.root)
 
 
+def calculate_net_balance(username):
+    cursor.execute("SELECT SUM(Amount) FROM Incomes "
+                   "WHERE UserID IN (SELECT UserID FROM Users where Username = ?)", username)
+    total_incomes = cursor.fetchone()
+
+    cursor.execute("SELECT SUM(Amount) FROM Expenses "
+                   "WHERE UserID IN (SELECT UserID FROM Users where Username = ?)", username)
+    total_expenses = cursor.fetchone()
+
+    income_amount = total_incomes[0] if total_incomes[0] is not None else 0
+    expense_amount = total_expenses[0] if total_expenses[0] is not None else 0
+
+    balance = income_amount - expense_amount
+
+    return balance
+
+
+class Home:
+    def __init__(self, username):
+        self.root = tk.Tk()
+        self.root.title("My Wallet")
+        self.root.configure(background="Navy Blue")
+
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        x_coordinate = (screen_width // 2) - (400 // 2)
+        y_coordinate = (screen_height // 2) - (700 // 2)
+        self.root.geometry(f"{400}x{700}+{x_coordinate}+{y_coordinate}")
+
+        cursor.execute("SELECT * FROM Users WHERE Username=?", username)
+        self.user = cursor.fetchone()
+
+        self.welcome_label = tk.Label(self.root, text=f"Welcome {self.user[3]}",
+                                      font=("Arial", 15), fg='white', background='Navy Blue')
+        self.welcome_label.pack(pady=30)
+
+        self.balance_label = tk.Label(self.root, text=f"Current account balance",
+                                      font=("Arial", 12), fg='white', background='Navy Blue')
+        self.balance_label.pack(anchor="w", padx=15)
+
+        self.balance_amount_label = tk.Label(self.root, text=f"$ {calculate_net_balance(self.user[3])}",
+                                             font=("Arial", 17), fg='white', background='Navy Blue')
+        self.balance_amount_label.pack(anchor="w", padx=15)
+
+        self.info_frame = tk.Frame(self.root)
+        self.info_frame.configure(background="Navy Blue")
+
+        self.incomes_label = tk.Label(self.info_frame, text="Incomes",
+                                      font=("Arial", 13), fg='white', background='Navy Blue')
+        self.incomes_label.grid(row=0, column=0, pady=10)
+
+        self.incomes_button = tk.Button(self.info_frame, text="See incomes", font=("Arial", 13),
+                                        command=self.get_incomes_summary)
+        self.incomes_button.grid(row=1, column=0, padx=20)
+
+        self.expenses_label = tk.Label(self.info_frame, text="Expenses", font=("Arial", 13),
+                                       fg='white', background='Navy Blue')
+        self.expenses_label.grid(row=0, column=1, pady=10)
+
+        self.expenses_button = tk.Button(self.info_frame, text="See expenses", font=("Arial", 13),
+                                         command=self.get_expenses_summary)
+        self.expenses_button.grid(row=1, column=1, padx=20)
+
+        self.info_frame.pack()
+
+    def get_incomes_summary(self):
+        cursor.execute("SELECT SUM(Amount), Categories.CategoryName FROM Incomes, Categories "
+                       "WHERE UserID IN (SELECT UserID FROM Users WHERE Username=?) AND "
+                       "Incomes.CategoryID = Categories.CategoryID "
+                       "GROUP BY Categories.CategoryName", self.user[3])
+        info = cursor.fetchall()
+
+        if not info or all(row[0] is None for row in info):
+            fig, ax = plt.subplots()
+            ax.pie([1], colors=["#d3d3d3"], startangle=90)
+            plt.title("No Incomes")
+
+        else:
+            labels = [row[1] for row in info]
+            values = [row[0] if row[0] is not None else 0 for row in info]
+            fix, ax = plt.subplot()
+            ax.pie(values, labels=labels, autopct="%1.2f%%")
+            plt.title("Incomes")
+
+        plt.show()
+
+    def get_expenses_summary(self):
+        cursor.execute("SELECT SUM(Amount), Categories.CategoryName FROM Expenses, Categories "
+                       "WHERE UserID IN (SELECT UserID FROM Users WHERE Username=?) AND "
+                       "Expenses.CategoryID = Categories.CategoryID "
+                       "GROUP BY Categories.CategoryName", self.user[3])
+        info = cursor.fetchall()
+
+        if not info or all(row[0] is None for row in info):
+            fig, ax = plt.subplots()
+            ax.pie([1], colors=["#d3d3d3"], startangle=90)
+            plt.title("No Expenses")
+
+        else:
+            labels = [row[1] for row in info]
+            values = [row[0] if row[0] is not None else 0 for row in info]
+            fix, ax = plt.subplot()
+            ax.pie(values, labels=labels, autopct="%1.2f%%")
+            plt.title("Expenses")
+
+        plt.show()
+
+
 if __name__ == "__main__":
     Login()
-
-
