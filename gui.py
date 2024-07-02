@@ -84,7 +84,8 @@ class Register:
 
         existing_user = check_user(username)
         if existing_user:
-            self.error_label.config(text="Username already exists!\nPlease choose another one.")
+            self.error_label.config(text="Username already exists!\nPlease choose another one.",
+                                    font=("Arial", 10), fg='red', background='Navy Blue')
             return
 
         hashed_password = self.hash_password(password)
