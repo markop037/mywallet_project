@@ -1,0 +1,66 @@
+[33mcommit 1a9433998f6f1ae82f2accc4430d0128c2139276[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m
+Merge: 9aad8f5 d71fa85
+Author: Marko Peric <marko.peric2102@gmail.com>
+Date:   Sun Jul 21 11:52:52 2024 +0200
+
+    Merge branch 'master' of https://github.com/markop037/mywallet_project
+
+[33mcommit 9aad8f5fc04832815fc35cf4653622c9f7013b12[m
+Author: Marko Peric <marko.peric2102@gmail.com>
+Date:   Sun Jul 21 11:50:29 2024 +0200
+
+    Adding images
+
+[33mcommit d71fa85fad79f9473f1bec643254e0dc3f2b1113[m
+Author: Marko Perić <marko.peric2102@gmail.com>
+Date:   Sun Jul 21 11:46:19 2024 +0200
+
+    Update README.md
+
+[33mcommit 93e38a74088b554456562daa7659fa143aeed008[m
+Author: Marko Perić <marko.peric2102@gmail.com>
+Date:   Fri Jul 19 16:08:37 2024 +0200
+
+    Update README.md
+
+[33mcommit a1763b01018eabcc63db8182aabac8a3de4262fb[m
+Author: Marko Perić <marko.peric2102@gmail.com>
+Date:   Fri Jul 19 14:48:29 2024 +0200
+
+    Update README.md
+
+[33mcommit ba7aa1bd64155e0cb8417cbc6caa7d1b53e53b97[m
+Author: Marko Peric <marko.peric2102@gmail.com>
+Date:   Fri Jul 19 14:44:43 2024 +0200
+
+    Adding README.md
+
+[33mcommit ab61f86d8642951e2ede96c2f886121e98528cbe[m[33m ([m[1;33mtag: [m[1;33mv1.0[m[33m)[m
+Author: Marko Peric <marko.peric2102@gmail.com>
+Date:   Tue Jul 2 13:42:48 2024 +0200
+
+    Full version
+
+[33mcommit e99c79715214cc8d45b3e8468f52d87ad9305a96[m
+Author: Marko Peric <marko.peric2102@gmail.com>
+Date:   Mon Jul 1 18:21:20 2024 +0200
+
+    Completed homepage
+
+[33mcommit 7a7e782cc943813e81b66a8156b3e719d4a3deed[m
+Author: Marko Peric <marko.peric2102@gmail.com>
+Date:   Mon Jul 1 01:11:59 2024 +0200
+
+    Added home page and graphical display of incomes and expenses
+
+[33mcommit 3b77650a71a3d8ff7109f9a535d55afdc44d5e45[m
+Author: Marko Peric <marko.peric2102@gmail.com>
+Date:   Sun Jun 30 00:47:49 2024 +0200
+
+    Added password hashing
+
+[33mcommit ba1140d03687564418ac1eaf9ac8c72c69787eeb[m
+Author: Marko Peric <mperic2106@gmail.com>
+Date:   Sat Jun 29 11:26:17 2024 +0200
+
+    Log in and Sign up
