@@ -34,4 +34,29 @@ The implementation requires:
 - ODBC Driver 17 for SQL Server for database connectivity.
 
 ## Program Demonstration
-![LogIn](images//Capture1.PNG)
+<div align="center">
+  <img src="images/Capture1.PNG" alt="LogIn" height="350">
+  <p>Log In</p>
+  <img src="images/Capture6.PNG" alt="LogIn" height="350">
+  <p>Verification of entered data</p>
+  <hr>
+  <img src="images/Capture2.PNG" alt="LogIn" height="350">
+  <p>Sign Up</p>
+  <img src="images/Capture7.PNG" alt="LogIn" height="350">
+  <img src="images/Capture8.PNG" alt="LogIn" height="350">
+  <img src="images/Capture10.PNG" alt="LogIn" height="350">
+  <p>Verification of entered data</p>
+  <img src="images/Capture9.PNG" alt="LogIn" height="350">
+  <p>Successful registration</p>
+  <hr>
+  <img src="images/Capture3.PNG" alt="LogIn" height="400">
+  <p>Application</p>
+  <img src="images/Capture4.PNG" alt="LogIn" height="400">
+  <img src="images/Capture5.PNG" alt="LogIn" height="400">
+  <p>Incomes and Expenses before addition</p>
+  <img src="images/Capture11.PNG" alt="LogIn" height="400">
+  <p>Verification of entered data</p>
+  <img src="images/Capture12.PNG" alt="LogIn" height="400">
+  <img src="images/Capture13.PNG" alt="LogIn" height="400">
+  <p>Incomes and Expenses after addition</p>
+</div>
