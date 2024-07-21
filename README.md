@@ -6,7 +6,7 @@ MyWallet
 2. [Process and Information Flow Analysis](#process-and-information-flow-analysis)
 3. [Conceptual and Physical Model](#conceptual-and-physical-model)
 4. [Implementation Conditions](#implementation-conditions)
-5. [Test Data](#test-data)
+5. [Program Demonstration](#program-demonstration)
 
 ## Introduction
 This project aims to develop the MyWallet application, which enables users to efficiently manage their income and expenses. The application is built using Python, Pyodbc for connecting to an SQL Server database, Matplotlib for data visualization, and Tkinter for the user interface. The main features include user registration, login, and viewing and adding income and expenses.
@@ -33,9 +33,5 @@ The implementation requires:
 - SQL Server with a database named 'MYWALLET'.
 - ODBC Driver 17 for SQL Server for database connectivity.
 
-## Test Data
-Test data includes:
-- User registration data: first name, last name, username, password, email.
-- Income data: user reference, category reference, amount, description.
-- Expense data: user reference, category reference, amount, description.
-- Categories: predefined set of categories for income and expenses.
+## Program Demonstration
+
