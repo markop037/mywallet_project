@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, Float, ForeignKey, String
 from sqlalchemy.orm import relationship
-from database import Base
+from .database import Base
 
 
 # Category Table ORM Model
