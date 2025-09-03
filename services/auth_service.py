@@ -8,10 +8,8 @@ class AuthService:
         self.session = db_session
 
     def register_user(self, first_name, last_name, username, password, email):
-        # Hash the plain-text password before saving it to the database
         hashed_password = generate_password_hash(password)
 
-        # Create a new User object
         user = User(
             FirstName=first_name,
             LastName=last_name,
@@ -27,10 +25,9 @@ class AuthService:
         except IntegrityError:
             # Roll back the session if there is a uniqueness violation
             self.session.rollback()
-            return False, "Username already exists"
+            return False, "Username or email already exists"
 
     def check_user(self, username):
-        # Query the database for a user with the given username
         return self.session.query(User).filter_by(Username=username).first()
 
     def check_user_password(self, username, password):
