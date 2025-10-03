@@ -19,6 +19,7 @@ class Income(Base):
     Amount = Column(Float, nullable=False)
     UserID = Column(Integer, ForeignKey("Users.UserID"))
     CategoryID = Column(Integer, ForeignKey("Categories.CategoryID"))
+    Description = Column(String(255), nullable=True)
 
     user = relationship("User")
     category = relationship("Category")
@@ -32,6 +33,7 @@ class Expense(Base):
     Amount = Column(Float, nullable=False)
     UserID = Column(Integer, ForeignKey("Users.UserID"))
     CategoryID = Column(Integer, ForeignKey("Categories.CategoryID"))
+    Description = Column(String(255), nullable=True)
 
     user = relationship("User")
     category = relationship("Category")
