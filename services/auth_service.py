@@ -8,6 +8,14 @@ class AuthService:
         self.session = db_session
 
     def register_user(self, first_name, last_name, username, password, email):
+        # Check if username or email already exists
+        existing_user = self.session.query(User).filter(
+            (User.Username == username) | (User.Email == email)
+        ).first()
+
+        if existing_user:
+            return False, "Username or email already exists"
+
         hashed_password = generate_password_hash(password)
 
         user = User(
@@ -17,15 +25,9 @@ class AuthService:
             Password=hashed_password,
             Email=email
         )
-        try:
-            # Add the user to the session and commit to save it in the DB
-            self.session.add(user)
-            self.session.commit()
-            return True, "User successfully registered"
-        except IntegrityError:
-            # Roll back the session if there is a uniqueness violation
-            self.session.rollback()
-            return False, "Username or email already exists"
+        self.session.add(user)
+        self.session.commit()
+        return True, "User successfully registered"
 
     def check_user(self, username):
         return self.session.query(User).filter_by(Username=username).first()
