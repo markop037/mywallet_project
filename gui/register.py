@@ -1,14 +1,68 @@
+import re
+
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton
 from PySide6.QtCore import Qt
 from services.auth_service import AuthService
+from models.database import Database
+from config import DB_SERVER, DB_NAME
 
 
 class Register(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Sign Up")
-        self.setStyleSheet("background-color: navy; color: white;")
-        self.resize(320, 540)
+        self.resize(380, 400)
+
+        # Kopirani stil iz Login
+        self.setStyleSheet("""
+            QWidget {
+                background-color: #2E2E2E;
+                color: #F5F5F5;
+                font-size: 14px;
+                font-family: Segoe UI, Arial, sans-serif;
+            }
+            QLineEdit {
+                background-color: #3C3C3C;
+                border: 1px solid #555;
+                border-radius: 6px;
+                padding: 6px;
+                color: white;
+            }
+            QLineEdit:focus {
+                border: 1px solid #4CAF50;
+            }
+            QPushButton {
+                background-color: #4CAF50;
+                border: none;
+                border-radius: 6px;
+                padding: 8px;
+                color: white;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #45a049;
+            }
+            QPushButton#login {
+                background: transparent;
+                color: #03A9F4;
+                text-decoration: none;
+                border: none;
+            }
+            QPushButton#login:hover {
+                color: #29B6F6;
+                text-decoration: underline;
+            }
+            QLabel#title {
+                font-size: 18px;
+                font-weight: bold;
+                color: #ffffff;
+            }
+            QLabel#error {
+                color: #FF5252;
+                font-weight: bold;
+            }
+        """)
+
         self.firstName_entry = None
         self.lastName_entry = None
         self.username_entry = None
@@ -17,44 +71,74 @@ class Register(QWidget):
         self.email_entry = None
         self.signUp_button = None
         self.error_label = None
+        self.login_window = None
+        self.login_button = None
+
+        self.database = Database(DB_SERVER, DB_NAME)
+        self.session = self.database.get_session()
+        self.auth_service = AuthService(self.session)
 
         self.init_ui()
 
     def init_ui(self):
         layout = QVBoxLayout()
+        layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        layout.setSpacing(12)
 
-        layout.addWidget(QLabel("MyWallet"), alignment=Qt.AlignmentFlag.AlignVCenter)
-        layout.addSpacing(20)
+        title_label = QLabel("Create your account", alignment=Qt.AlignmentFlag.AlignCenter)
+        title_label.setObjectName("title")
+        layout.addWidget(title_label)
 
+        # Polja
         self.firstName_entry = QLineEdit()
+        self.firstName_entry.setPlaceholderText("First Name")
+
         self.lastName_entry = QLineEdit()
+        self.lastName_entry.setPlaceholderText("Last Name")
+
         self.username_entry = QLineEdit()
+        self.username_entry.setPlaceholderText("Username*")
+
         self.password_entry = QLineEdit()
         self.password_entry.setEchoMode(QLineEdit.EchoMode.Password)
+        self.password_entry.setPlaceholderText("Password*")
+
         self.confirm_password_entry = QLineEdit()
         self.confirm_password_entry.setEchoMode(QLineEdit.EchoMode.Password)
+        self.confirm_password_entry.setPlaceholderText("Confirm Password*")
+
         self.email_entry = QLineEdit()
+        self.email_entry.setPlaceholderText("Email")
 
         fields = [
-            ("First Name", self.firstName_entry),
-            ("Last Name", self.lastName_entry),
-            ("Username*", self.username_entry),
-            ("Password*", self.password_entry),
-            ("Confirm Password*", self.confirm_password_entry),
-            ("Email", self.email_entry),
+            self.firstName_entry,
+            self.lastName_entry,
+            self.username_entry,
+            self.password_entry,
+            self.confirm_password_entry,
+            self.email_entry,
         ]
 
-        for label, widget in fields:
-            layout.addWidget(QLabel(label))
+        for widget in fields:
             layout.addWidget(widget)
 
+        # Dugme za registraciju
         self.signUp_button = QPushButton("Sign Up")
         self.signUp_button.clicked.connect(self.register_user)
+        self.signUp_button.setCursor(Qt.CursorShape.PointingHandCursor)
         layout.addWidget(self.signUp_button)
 
+        # Error label
         self.error_label = QLabel("")
-        self.error_label.setStyleSheet("color: red;")
+        self.error_label.setObjectName("error")
         layout.addWidget(self.error_label)
+
+        # Dugme za login
+        self.login_button = QPushButton("Already have an account? Log In")
+        self.login_button.setObjectName("login")
+        self.login_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.login_button.clicked.connect(self.show_login_form)
+        layout.addWidget(self.login_button)
 
         self.setLayout(layout)
 
@@ -66,20 +150,48 @@ class Register(QWidget):
         confirm_password = self.confirm_password_entry.text()
         email = self.email_entry.text()
 
-        if not username or not password or not confirm_password:
-            self.error_label.setText("Fill in all fields marked with *.")
+        if not all([first_name, last_name, username, password, confirm_password, email]):
+            self.error_label.setText("Please fill in all fields.")
+            return
+
+        password_pattern = r'^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$'
+        if not re.match(password_pattern, password):
+            self.error_label.setText(
+                "Password must be at least 8 characters long\n"
+                "Include a number\n"
+                "Include an uppercase letter\n"
+                "Include a special character"
+            )
+            return
+
+        email_pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+        if not re.match(email_pattern, email):
+            self.error_label.setText(
+                "Please enter a valid email address"
+            )
             return
 
         if password != confirm_password:
             self.error_label.setText("Passwords do not match.")
             return
 
-        success, message = AuthService.register_user(first_name, last_name, username, password, email)
+        success, message = self.auth_service.register_user(first_name, last_name, username, password, email)
 
         if success:
-            self.error_label.setStyleSheet("color: green;")
+            self.error_label.setStyleSheet("color: green; font-weight: bold;")
             self.error_label.setText(message)
 
+            from gui.login import Login
+            self.login_window = Login()
+            self.login_window.show_message("Registration successful! Please log in.", "green")
+            self.login_window.show()
+            self.close()
         else:
-            self.error_label.setStyleSheet("color: red;")
+            self.error_label.setStyleSheet("color: red; font-weight: bold;")
             self.error_label.setText(message)
+
+    def show_login_form(self):
+        from gui.login import Login
+        self.login_window = Login()
+        self.login_window.show()
+        self.close()

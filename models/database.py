@@ -17,6 +17,8 @@ class Database:
         self.engine = create_engine(conn_str, echo=False)
         self.session = sessionmaker(bind=self.engine)
 
+        Base.metadata.create_all(self.engine)
+
     def create_table(self):
         # Create all tables defined in ORM models
         Base.metadata.create_all(self.engine)
