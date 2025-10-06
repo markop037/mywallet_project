@@ -2,10 +2,11 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineE
                                QTextEdit, QListWidget, QMessageBox)
 from services.auth_service import AuthService
 from services.finance_service import FinanceService
-from models.finance import Income, Expense, IncomeCategory, ExpenseCategory
+from models.finance import IncomeCategory, ExpenseCategory
 from PySide6.QtCore import Qt
 from models.database import Database
 from config import DB_SERVER, DB_NAME
+from gui.chart import ChartDialog
 
 
 class Home(QWidget):
@@ -173,11 +174,23 @@ class Home(QWidget):
 
     def get_incomes_summary(self):
         summary = self.finance_service.get_income_summary(user_id=self.user.UserID)
-        QMessageBox.information(self, "Incomes Summary", str(summary))
+
+        # Pretpostavljamo da je svaki item: (id, category, amount)
+        categories = [item[1] for item in summary]  # 1 = category
+        amounts = [item[0] for item in summary]  # 2 = amount
+        total_amount = sum(amounts)
+
+        dialog = ChartDialog(categories, amounts, "Incomes Summary", total_amount)
+        dialog.exec()
 
     def get_expenses_summary(self):
         summary = self.finance_service.get_expense_summary(user_id=self.user.UserID)
-        QMessageBox.information(self, "Expenses Summary", str(summary))
+        categories = [item[1] for item in summary]
+        amounts = [item[0] for item in summary]
+        total_amount = sum(amounts)
+
+        dialog = ChartDialog(categories, amounts, "Expenses Summary", total_amount)
+        dialog.exec()
 
     def add_income(self):
         if self.expense_list.selectedItems():
