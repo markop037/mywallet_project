@@ -131,6 +131,9 @@ class Home(QWidget):
 
         self.load_categories()
 
+        self.income_list.itemSelectionChanged.connect(self.on_income_selection_changed)
+        self.expense_list.itemSelectionChanged.connect(self.on_expense_selection_changed)
+
         h_cat_layout.addWidget(self.income_list)
         h_cat_layout.addWidget(self.expense_list)
         layout.addLayout(h_cat_layout)
@@ -177,8 +180,20 @@ class Home(QWidget):
         QMessageBox.information(self, "Expenses Summary", str(summary))
 
     def add_income(self):
+        if self.expense_list.selectedItems():
+            self.error_label.setText("Cannot add income while an expense category is selected.")
+            return
+
         selected_items = self.income_list.selectedItems()
         if selected_items and self.amount_entry.text():
+            try:
+                amount = float(self.amount_entry.text())
+            except ValueError:
+                self.error_label.setText("Amount must be a number.")
+                return
+            if amount <= 0:
+                self.error_label.setText("Amount must be greater than 0.")
+                return
             selected_text = selected_items[0].text()
             category_id = int(selected_text.split(":")[0])  # uzmi ID iz stringa
             self.finance_service.add_income(
@@ -193,8 +208,24 @@ class Home(QWidget):
             self.error_label.setText("Fill in all fields marked with *.")
 
     def add_expense(self):
+        if self.income_list.selectedItems():
+            self.error_label.setText("Cannot add expense while an income category is selected.")
+            return
+
         selected_items = self.expense_list.selectedItems()
         if selected_items and self.amount_entry.text():
+            try:
+                amount = float(self.amount_entry.text())
+            except ValueError:
+                self.error_label.setText("Amount must be a number.")
+                return
+            if amount <= 0:
+                self.error_label.setText("Amount must be greater than 0.")
+                return
+            current_balance = self.finance_service.calculate_net_balance(self.user.UserID)
+            if current_balance < amount:
+                self.error_label.setText("Cannot add expense. Balance cannot go below $0.")
+                return
             selected_text = selected_items[0].text()
             category_id = int(selected_text.split(":")[0])  # uzmi ID iz stringa
             self.finance_service.add_expense(
@@ -207,3 +238,13 @@ class Home(QWidget):
             self.error_label.setText("")
         else:
             self.error_label.setText("Fill in all fields marked with *.")
+
+    def on_income_selection_changed(self):
+        if self.income_list.selectedItems():
+            self.expense_list.clearSelection()
+            self.error_label.setText("")
+
+    def on_expense_selection_changed(self):
+        if self.expense_list.selectedItems():
+            self.income_list.clearSelection()
+            self.error_label.setText("")
