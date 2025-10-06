@@ -1,4 +1,4 @@
-from models.finance import Income, Expense, Category
+from models.finance import Income, Expense, IncomeCategory, ExpenseCategory
 from sqlalchemy import func
 
 
@@ -26,15 +26,27 @@ class FinanceService:
         # Return the net balance
         return total_income - total_expense
 
-    def get_summary(self, model, user_id):
+    def get_income_summary(self, user_id):
         return (
             self.session.query(
-                func.sum(model.Amount),
-                Category.CategoryName
+                func.sum(Income.Amount).label("TotalIncome"),
+                IncomeCategory.CategoryName
             )
-            .join(Category, model.CategoryID == Category.CategoryID)
-            .filter(model.UserID == user_id)
-            .group_by(Category.CategoryID, Category.CategoryName)
+            .join(IncomeCategory, Income.CategoryID == IncomeCategory.CategoryID)
+            .filter(Income.UserID == user_id)
+            .group_by(IncomeCategory.CategoryID, IncomeCategory.CategoryName)
+            .all()
+        )
+
+    def get_expense_summary(self, user_id):
+        return (
+            self.session.query(
+                func.sum(Expense.Amount).label("TotalExpense"),
+                ExpenseCategory.CategoryName
+            )
+            .join(ExpenseCategory, Expense.CategoryID == ExpenseCategory.CategoryID)
+            .filter(Expense.UserID == user_id)
+            .group_by(ExpenseCategory.CategoryID, ExpenseCategory.CategoryName)
             .all()
         )
 
