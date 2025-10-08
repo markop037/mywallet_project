@@ -13,6 +13,6 @@ class User(Base):
     Password = Column(String(255), nullable=False)
     Email = Column(String(100), unique=True, nullable=False)
 
-    # String representation of the User object for debugging
     def __repr__(self):
+        # String representation of the User object for debugging
         return f"<User(username={self.Username}, email={self.Email})>"

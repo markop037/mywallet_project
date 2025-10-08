@@ -9,6 +9,7 @@ from werkzeug.security import check_password_hash
 
 @pytest.fixture
 def session():
+    # Create a temporary in-memory database session for testing
     engine = create_engine("sqlite:///:memory:", echo=False)
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
@@ -19,10 +20,12 @@ def session():
 
 @pytest.fixture
 def auth_service(session):
+    # Provide an AuthService instance for testing
     return AuthService(session)
 
 
 def test_register_user_success(auth_service, session):
+    # Test that a user can be successfully registered
     success, message = auth_service.register_user(
         "Marko", "Peric", "marko_p",
         "StrongPass123", "marko.peric@gmail.com"
@@ -37,6 +40,7 @@ def test_register_user_success(auth_service, session):
 
 
 def test_register_user_duplicate(auth_service, session):
+    # Test that registering a user with existing username/email fails
     auth_service.register_user(
         "Marko", "Peric", "marko_p",
         "StrongPass123", "marko.peric@gmail.com"
@@ -52,6 +56,7 @@ def test_register_user_duplicate(auth_service, session):
 
 
 def test_check_user_existing(auth_service, session):
+    # Test that user exists
     auth_service.register_user(
         "Marko", "Peric", "marko_p",
         "StrongPass123", "marko.peric@gmail.com"
@@ -64,6 +69,7 @@ def test_check_user_existing(auth_service, session):
 
 
 def test_check_user_password_correct(auth_service, session):
+    # Test that password verification works correctly for a user
     auth_service.register_user(
         "Marko", "Peric", "marko_p",
         "StrongPass123", "marko.peric@gmail.com"

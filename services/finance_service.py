@@ -26,6 +26,7 @@ class FinanceService:
         # Return the net balance
         return total_income - total_expense
 
+    # Get total income per category for a specific user
     def get_income_summary(self, user_id):
         return (
             self.session.query(
@@ -35,9 +36,10 @@ class FinanceService:
             .join(IncomeCategory, Income.CategoryID == IncomeCategory.CategoryID)
             .filter(Income.UserID == user_id)
             .group_by(IncomeCategory.CategoryID, IncomeCategory.CategoryName)
-            .all()
+            .all()  # Return all results
         )
 
+    # Get total expenses per category for a specific user
     def get_expense_summary(self, user_id):
         return (
             self.session.query(
@@ -47,9 +49,10 @@ class FinanceService:
             .join(ExpenseCategory, Expense.CategoryID == ExpenseCategory.CategoryID)
             .filter(Expense.UserID == user_id)
             .group_by(ExpenseCategory.CategoryID, ExpenseCategory.CategoryName)
-            .all()
+            .all()  # Return all results
         )
 
+    # Add a new income record for a user
     def add_income(self, user_id, category_id, amount, description=""):
         new_income = Income(
             Amount=amount,
@@ -60,6 +63,7 @@ class FinanceService:
         self.session.add(new_income)
         self.session.commit()
 
+    # Add a new expense record for a user
     def add_expense(self, user_id, category_id, amount, description=""):
         new_expense = Expense(
             Amount=amount,

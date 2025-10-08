@@ -8,43 +8,43 @@ class ChartDialog(QDialog):
     def __init__(self, categories, amounts, title, total_amount):
         super().__init__()
         self.setWindowTitle(title)
-        self.resize(600, 500)  # početna veličina dijaloga
+        self.resize(600, 500)
 
         # Layout
         layout = QVBoxLayout()
         self.setLayout(layout)
 
-        # Figure sa automatskim rasporedom
+        # Figure with automatic layout adjustment
         fig = Figure(constrained_layout=True, facecolor="#2E2E2E")
         self.canvas = FigureCanvas(fig)
         layout.addWidget(self.canvas)
 
         ax = fig.add_subplot(111)
 
-        # Napravi pie chart
+        # Create pie chart
         wedges, texts, autotexts = ax.pie(
             amounts,
-            labels=None,  # ne stavljamo labels direktno
-            autopct=lambda pct: f"{pct:.1f}%",  # procenat unutar segmenta
+            labels=None,  # don't display labels directly
+            autopct=lambda pct: f"{pct:.1f}%",  # percentage inside each segment
             startangle=90,
             textprops={'fontsize': 10}
         )
-        ax.axis('equal')  # da bude krug
+        ax.axis('equal')  # make it a perfect circle
 
-        # Pripremi legendu: "Naziv: iznos (procenat%)"
+        # Prepare legend: "Name: amount (percentage%)"
         total = sum(amounts)
         legend_labels = [
             f"{cat}: {amt}$ ({amt/total*100:.1f}%)" for cat, amt in zip(categories, amounts)
         ]
 
-        # Dodaj legendu ispod pie charta
+        # Add legend below the pie chart
         ax.legend(
             wedges,
             legend_labels,
             title="Categories",
             loc="upper center",
-            bbox_to_anchor=(0.5, -0.05),  # ispod charta
-            ncol=1,  # jedna kolona
+            bbox_to_anchor=(0.5, -0.05),  # below the chart
+            ncol=1,  # one column
             frameon=True,
             fontsize=10
         )

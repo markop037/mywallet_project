@@ -9,6 +9,7 @@ from models.database import Base
 
 @pytest.fixture
 def session():
+    # Create a temporary in-memory database session for testing
     engine = create_engine("sqlite:///:memory:", echo=False)
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
@@ -18,6 +19,7 @@ def session():
 
 
 def test_create_user(session):
+    # Test that a new user can be created and stored in the database
     user = User(
         FirstName="Marko",
         LastName="Peric",
@@ -35,6 +37,7 @@ def test_create_user(session):
 
 
 def test_unique_username_and_email(session):
+    # Test that duplicate username or email raises an IntegrityError
     user1 = User(
         FirstName="Marko",
         LastName="Peric",
@@ -62,6 +65,7 @@ def test_unique_username_and_email(session):
 
 
 def test_add_income_and_expense(session):
+    # Test that income and expense records can be added and related to the correct user and category
     user = User(
         FirstName="Marko",
         LastName="Peric",
@@ -89,5 +93,3 @@ def test_add_income_and_expense(session):
     assert fetched_income.category.CategoryName == "Freelance"
     assert fetched_expense.category.CategoryName == "Transport"
     assert fetched_income.user.Username == "marko123"
-
-

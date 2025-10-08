@@ -29,6 +29,7 @@ class AuthService:
         return True, "User successfully registered"
 
     def check_user(self, username):
+        # Check if the user exists
         return self.session.query(User).filter_by(Username=username).first()
 
     def check_user_password(self, username, password):
