@@ -19,10 +19,6 @@ class Database:
 
         Base.metadata.create_all(self.engine)
 
-    def create_table(self):
-        # Create all tables defined in ORM models
-        Base.metadata.create_all(self.engine)
-
     def get_session(self):
         # Return a new session instance for performing DB operations
         return self.session()
