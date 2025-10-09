@@ -232,8 +232,15 @@ class Home(QWidget):
 
             # Update balance label
             self.balance_amount_label.setText(f"$ {self.finance_service.calculate_net_balance(self.user.UserID)}")
-            self.error_label.setText("")
+            self.error_label.setStyleSheet("color: green; font-weight: bold;")
+            self.error_label.setText("Income added successfully!")
+
+            # Reset inputs for new entry
+            self.amount_entry.clear()
+            self.description_text.clear()
+            self.income_list.clearSelection()
         else:
+            self.error_label.setStyleSheet("color: red; font-weight: bold;")
             self.error_label.setText("Fill in all fields marked with *.")
 
     def add_expense(self):
@@ -273,8 +280,15 @@ class Home(QWidget):
 
             # Update balance label
             self.balance_amount_label.setText(f"$ {self.finance_service.calculate_net_balance(self.user.UserID)}")
-            self.error_label.setText("")
+            self.error_label.setStyleSheet("color: green; font-weight: bold;")
+            self.error_label.setText("Expense added successfully!")
+
+            # Reset inputs for new entry
+            self.amount_entry.clear()
+            self.description_text.clear()
+            self.expense_list.clearSelection()
         else:
+            self.error_label.setStyleSheet("color: red; font-weight: bold;")
             self.error_label.setText("Fill in all fields marked with *.")
 
     def on_income_selection_changed(self):

@@ -23,8 +23,10 @@ class FinanceService:
             or 0
         )
 
+        balance = round(total_income - total_expense, 3)
+
         # Return the net balance
-        return total_income - total_expense
+        return balance
 
     # Get total income per category for a specific user
     def get_income_summary(self, user_id):
