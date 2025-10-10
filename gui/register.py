@@ -101,15 +101,15 @@ class Register(QWidget):
         self.lastName_entry.setPlaceholderText("Last Name")
 
         self.username_entry = QLineEdit()
-        self.username_entry.setPlaceholderText("Username*")
+        self.username_entry.setPlaceholderText("Username")
 
         self.password_entry = QLineEdit()
         self.password_entry.setEchoMode(QLineEdit.EchoMode.Password)  # Hide password input
-        self.password_entry.setPlaceholderText("Password*")
+        self.password_entry.setPlaceholderText("Password")
 
         self.confirm_password_entry = QLineEdit()
         self.confirm_password_entry.setEchoMode(QLineEdit.EchoMode.Password)
-        self.confirm_password_entry.setPlaceholderText("Confirm Password*")
+        self.confirm_password_entry.setPlaceholderText("Confirm Password")
 
         self.email_entry = QLineEdit()
         self.email_entry.setPlaceholderText("Email")

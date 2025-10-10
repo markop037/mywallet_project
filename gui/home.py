@@ -204,6 +204,7 @@ class Home(QWidget):
     def add_income(self):
         # Add a new income entry for the selected category
         if self.expense_list.selectedItems():
+            self.error_label.setStyleSheet("color: red; font-weight: bold;")
             self.error_label.setText("Cannot add income while an expense category is selected.")
             return
 
@@ -246,6 +247,7 @@ class Home(QWidget):
     def add_expense(self):
         # Add a new expense entry for the selected category
         if self.income_list.selectedItems():
+            self.error_label.setStyleSheet("color: red; font-weight: bold;")
             self.error_label.setText("Cannot add expense while an income category is selected.")
             return
 
@@ -254,15 +256,18 @@ class Home(QWidget):
             try:
                 amount = float(self.amount_entry.text())
             except ValueError:
+                self.error_label.setStyleSheet("color: red; font-weight: bold;")
                 self.error_label.setText("Amount must be a number.")
                 return
             if amount <= 0:
+                self.error_label.setStyleSheet("color: red; font-weight: bold;")
                 self.error_label.setText("Amount must be greater than 0.")
                 return
 
             # Prevent spending more than available balance
             current_balance = self.finance_service.calculate_net_balance(self.user.UserID)
             if current_balance < amount:
+                self.error_label.setStyleSheet("color: red; font-weight: bold;")
                 self.error_label.setText("Cannot add expense. Balance cannot go below $0.")
                 return
 
