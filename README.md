@@ -1,62 +1,146 @@
-MyWallet
+# MyWallet
 
 ## Table of Contents
 
-1. [Introduction](#introduction)
-2. [Process and Information Flow Analysis](#process-and-information-flow-analysis)
-3. [Conceptual and Physical Model](#conceptual-and-physical-model)
-4. [Implementation Conditions](#implementation-conditions)
-5. [Program Demonstration](#program-demonstration)
+1. [Introduction](#introduction)  
+2. [Process and Information Flow Analysis](#process-and-information-flow-analysis)  
+3. [Conceptual and Physical Model](#conceptual-and-physical-model)  
+4. [Implementation Conditions](#implementation-conditions)  
+5. [Visual Overview](#visual-overview)
+6. [MyWallet in Action](#mywallet-in-action)
+
+---
 
 ## Introduction
-This project aims to develop the MyWallet application, which enables users to efficiently manage their income and expenses. The application is built using Python, Pyodbc for connecting to an SQL Server database, Matplotlib for data visualization, and Tkinter for the user interface. The main features include user registration, login, and viewing and adding income and expenses.
+
+This project aims to develop the **MyWallet** application, which enables users to efficiently manage their incomes and expenses.  
+The application is built using **Python**, **SQLAlchemy** for database interaction with **SQL Server**, and **PySide6** for the graphical user interface.  
+
+The system provides a simple yet powerful platform where users can:
+- Register and log in securely.
+- Add and view income and expense records.
+- Instantly visualize their financial data with interactive charts.
+- Monitor balance changes in real time.
+
+The main purpose of MyWallet is to simplify personal finance tracking and encourage users to manage their budgets effectively.
+
+---
 
 ## Process and Information Flow Analysis
-The system allows users to register, log in, manage their income and expenses, and visualize financial summaries. The process starts with user registration, where details are saved in the database. Users can log in using their credentials, view their current balance, add income or expenses, and see summaries of their transactions.
+
+The workflow of the system can be divided into the following stages:
+
+1. **User Registration**  
+   Users enter their personal details such as username, email, and password. The system validates these inputs and stores them in the database. Duplicate accounts are prevented.
+
+2. **Login Authentication**  
+   Existing users can log in using their username and password. The system checks credentials against the stored database records and grants access to the application dashboard upon successful authentication.
+
+3. **My Wallet Home**  
+   After logging in, the user is presented with a home page showing:
+   - Current balance (Income – Expenses)
+   - Pie charts showing the distribution of income sources and expenses by category
+   - Buttons for adding new Income or Expense entries
+
+4. **Adding Transactions**  
+   Users can add income or expense entries by entering:
+   - Amount  
+   - Category  
+   - Optional description   
+
+   Input validation ensures the entered amount is numeric and positive. Once added, the database is updated, and the dashboard charts refresh automatically.
+
+5. **Data Visualization**  
+   The application generates charts to visually represent financial data. Income and expense categories are color-coded, and total amounts are displayed below each chart.
+
+---
 
 ## Conceptual and Physical Model
-**Conceptual Model:**
-1. **Users**: Stores user information including first name, last name, username, password, and email.
-2. **Incomes**: Stores income transactions with references to user and category.
-3. **Expenses**: Stores expense transactions with references to user and category.
-4. **Categories**: Stores categories for income and expense transactions.
 
-**Physical Model:**
-- **Users** table with columns: `UserID` (Primary Key), `FirstName`, `LastName`, `Username`, `Password`, `Email`.
-- **Incomes** table with columns: `IncomeID` (Primary Key), `UserID` (Foreign Key), `CategoryID` (Foreign Key), `Amount`, `Description`.
-- **Expenses** table with columns: `ExpenseID` (Primary Key), `UserID` (Foreign Key), `CategoryID` (Foreign Key), `Amount`, `Description`.
-- **Categories** table with columns: `CategoryID` (Primary Key), `CategoryName`.
+### **Conceptual Model**
+
+The conceptual model defines the main entities and their relationships:
+
+1. **Users**<br>
+   Stores basic information about registered users (first name, last name, username, email, password).
+
+2. **IncomeCategories**<br>
+   Defines categories for income transactions (e.g., Salary, Bonus).
+
+3. **ExpenseCategories**<br>
+   Defines categories for expense transactions (e.g., Food, Rent, Utilities).
+
+4. **Incomes**<br>
+   Records income transactions linked to users and income categories.
+
+5. **Expenses**<br>
+   Records expense transactions linked to users and expense categories.
+
+---
+
+### **Physical Model**
+
+| Table Name            | Description               | Columns                                                                                                                         |
+| --------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Users**             | Stores user information   | `UserID` *(PK)*, `FirstName`, `LastName`, `Username`, `Password`, `Email`                                                       |
+| **IncomeCategories**  | Stores income categories  | `CategoryID` *(PK)*, `CategoryName`                                                                                             |
+| **ExpenseCategories** | Stores expense categories | `CategoryID` *(PK)*, `CategoryName`                                                                                             |
+| **Incomes**           | Stores income records     | `IncomeID` *(PK)*, `UserID` *(FK → Users.UserID)*, `CategoryID` *(FK → IncomeCategories.CategoryID)*, `Amount`, `Description`   |
+| **Expenses**          | Stores expense records    | `ExpenseID` *(PK)*, `UserID` *(FK → Users.UserID)*, `CategoryID` *(FK → ExpenseCategories.CategoryID)*, `Amount`, `Description` |
+
+
+---
 
 ## Implementation Conditions
-The implementation requires:
-- Python 3.x with `pyodbc`, `matplotlib`, `bcrypt`, and `tkinter` libraries.
-- SQL Server with a database named 'MYWALLET'.
-- ODBC Driver 17 for SQL Server for database connectivity.
 
-## Program Demonstration
+To successfully run and test the **MyWallet** application, the following conditions must be met:
+
+### **Software Requirements**
+- **Python 3.12**  
+- **Libraries:**
+  - `SQLAlchemy` — ORM for database management  
+  - `PySide6` — for the GUI  
+
+### **Database Requirements**
+- **SQL Server** with a database named **your_database_name**  
+- Tables are initialized automatically using the SQLAlchemy ORM.  
+- A valid ODBC driver must be installed (e.g., *ODBC Driver 18 for SQL Server*).
+
+## Visual Overview
+
+Below are example screenshots demonstrating the workflow of the MyWallet application.
+
 <div align="center">
-  <img src="images/Capture1.PNG" alt="LogIn" height="350">
-  <p>Log In</p>
-  <img src="images/Capture6.PNG" alt="LogIn" height="350">
-  <p>Verification of entered data</p>
-  <hr>
-  <img src="images/Capture2.PNG" alt="LogIn" height="350">
-  <p>Sign Up</p>
-  <img src="images/Capture7.PNG" alt="LogIn" height="350">
-  <img src="images/Capture8.PNG" alt="LogIn" height="350">
-  <img src="images/Capture10.PNG" alt="LogIn" height="350">
-  <p>Verification of entered data</p>
-  <img src="images/Capture9.PNG" alt="LogIn" height="350">
-  <p>Successful registration</p>
-  <hr>
-  <img src="images/Capture3.PNG" alt="LogIn" height="400">
-  <p>Application</p>
-  <img src="images/Capture4.PNG" alt="LogIn" height="400">
-  <img src="images/Capture5.PNG" alt="LogIn" height="400">
-  <p>Incomes and Expenses before addition</p>
-  <img src="images/Capture11.PNG" alt="LogIn" height="400">
-  <p>Verification of entered data</p>
-  <img src="images/Capture12.PNG" alt="LogIn" height="400">
-  <img src="images/Capture13.PNG" alt="LogIn" height="400">
-  <p>Incomes and Expenses after addition</p>
+
+### **Login Page**
+<img src="images/LoginPage.png" alt="Login" height="350">
+<p>User login form</p>
+
+---
+
+### **Registration Page**
+<img src="images/RegistrationPage.png" alt="Register" height="350">
+<p>Registration form</p>
+
+---
+
+### **Home**
+<img src="images/HomePage.png" alt="My Wallet Home" height="400">
+<p>My Wallet Home</p>
+
+<img src="images/IncomesSummary.png" alt="Dashboard Income" height="400">
+<p>Showing income overview with pie chart and legend.</p>
+
+<img src="images/ExpensesSummary.png" alt="Dashboard Expense" height="400">
+<p>Showing expense overview with pie chart and legend.</p>
 </div>
+
+---
+
+## MyWallet in Action
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=xmtBjKOCBA8">
+    <img src="https://img.youtube.com/vi/xmtBjKOCBA8/maxresdefault.jpg" alt="MyWallet Demo Video" width="600"/>
+  </a>
+</p>
