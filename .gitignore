@@ -1,1 +1,16 @@
-config.py
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.db
+
+# Environment files (never commit secrets)
+.env
+
+# Frontend build output
+frontend/dist/
+frontend/node_modules/
+
+# Editor
+.idea/
+.vscode/
