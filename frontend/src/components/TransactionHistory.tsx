@@ -13,9 +13,14 @@ export function TransactionHistory({ transactions }: Props) {
   const deleteMutation = useMutation({
     mutationFn: ({ txType, txId }: { txType: string; txId: number }) =>
       deleteTransaction(token!, txType, txId),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
       queryClient.invalidateQueries({ queryKey: ["balance"] });
+      if (variables.txType === "Income") {
+        queryClient.invalidateQueries({ queryKey: ["incomeSummary"] });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["expenseSummary"] });
+      }
     },
   });
 

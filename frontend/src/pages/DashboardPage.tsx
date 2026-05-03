@@ -10,11 +10,13 @@ import {
   getIncomeCategories,
   getIncomeSummary,
   getTransactions,
+  type Period,
 } from "../api/finance";
 import { BalanceCard } from "../components/BalanceCard";
 import { SummaryChart } from "../components/SummaryChart";
 import { TransactionHistory } from "../components/TransactionHistory";
 import { useAuth } from "../hooks/useAuth";
+import { supabase } from "../lib/supabase";
 
 
 export default function DashboardPage() {
@@ -28,6 +30,7 @@ export default function DashboardPage() {
   const [selectedExpenseCategory, setSelectedExpenseCategory] = useState(0);
   const [txError, setTxError] = useState("");
   const [activeChart, setActiveChart] = useState<"incomes" | "expenses" | null>(null);
+  const [period, setPeriod] = useState<Period>("all");
 
   const { data: balanceData } = useQuery({
     queryKey: ["balance"],
@@ -36,20 +39,20 @@ export default function DashboardPage() {
   });
 
   const { data: transactions = [] } = useQuery({
-    queryKey: ["transactions"],
-    queryFn: () => getTransactions(token!).then((r) => r.data),
+    queryKey: ["transactions", period],
+    queryFn: () => getTransactions(token!, period).then((r) => r.data),
     enabled: !!token,
   });
 
   const { data: incomeSummary = [] } = useQuery({
-    queryKey: ["incomeSummary"],
-    queryFn: () => getIncomeSummary(token!).then((r) => r.data),
+    queryKey: ["incomeSummary", period],
+    queryFn: () => getIncomeSummary(token!, period).then((r) => r.data),
     enabled: !!token && activeChart === "incomes",
   });
 
   const { data: expenseSummary = [] } = useQuery({
-    queryKey: ["expenseSummary"],
-    queryFn: () => getExpenseSummary(token!).then((r) => r.data),
+    queryKey: ["expenseSummary", period],
+    queryFn: () => getExpenseSummary(token!, period).then((r) => r.data),
     enabled: !!token && activeChart === "expenses",
   });
 
@@ -117,7 +120,9 @@ export default function DashboardPage() {
     expenseMutation.mutate({ category_id: selectedExpenseCategory, amount: parsed, description });
   }
 
-  function handleLogout() {
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    queryClient.clear();
     logout();
     navigate("/login");
   }
@@ -139,6 +144,26 @@ export default function DashboardPage() {
 
       <main className="max-w-4xl mx-auto px-4 py-8 space-y-8">
         {balanceData && <BalanceCard balance={balanceData.balance} />}
+
+        {/* Period filter */}
+        <div className="bg-gray-800 rounded-xl p-4 space-y-3">
+          <p className="text-sm text-gray-400 font-medium">Filter by period</p>
+          <div className="flex flex-wrap gap-2">
+            {(["all", "day", "week", "month", "year"] as Period[]).map((p) => (
+              <button
+                key={p}
+                onClick={() => setPeriod(p)}
+                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors capitalize ${
+                  period === p
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                }`}
+              >
+                {p === "all" ? "All Time" : p === "day" ? "Today" : p.charAt(0).toUpperCase() + p.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* Chart toggle */}
         <div className="flex gap-3">
@@ -165,10 +190,16 @@ export default function DashboardPage() {
         </div>
 
         {activeChart === "incomes" && (
-          <SummaryChart data={incomeChartData} title="Income by Category" />
+          <SummaryChart
+            data={incomeChartData}
+            title={`Income by Category${period !== "all" ? ` — ${period === "day" ? "Today" : `This ${period.charAt(0).toUpperCase() + period.slice(1)}`}` : ""}`}
+          />
         )}
         {activeChart === "expenses" && (
-          <SummaryChart data={expenseChartData} title="Expenses by Category" />
+          <SummaryChart
+            data={expenseChartData}
+            title={`Expenses by Category${period !== "all" ? ` — ${period === "day" ? "Today" : `This ${period.charAt(0).toUpperCase() + period.slice(1)}`}` : ""}`}
+          />
         )}
 
         {/* Add transaction */}
@@ -248,7 +279,14 @@ export default function DashboardPage() {
 
         {/* Transaction history */}
         <div className="space-y-3">
-          <h2 className="text-lg font-bold">Recent Transactions</h2>
+          <h2 className="text-lg font-bold">
+            Transactions
+            {period !== "all" && (
+              <span className="ml-2 text-sm font-normal text-gray-400">
+                — {period === "day" ? "Today" : `This ${period.charAt(0).toUpperCase() + period.slice(1)}`}
+              </span>
+            )}
+          </h2>
           <TransactionHistory transactions={transactions} />
         </div>
       </main>

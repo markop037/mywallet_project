@@ -1,5 +1,23 @@
+from datetime import datetime, timedelta
+from typing import Optional
+
 from models.finance import Income, Expense, IncomeCategory, ExpenseCategory
 from sqlalchemy import func
+
+
+def _period_start(period: Optional[str]) -> Optional[datetime]:
+    """Return the UTC start datetime for the given period label, or None for all-time."""
+    now = datetime.utcnow()
+    if period == "day":
+        return now.replace(hour=0, minute=0, second=0, microsecond=0)
+    if period == "week":
+        start = now - timedelta(days=now.weekday())
+        return start.replace(hour=0, minute=0, second=0, microsecond=0)
+    if period == "month":
+        return now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    if period == "year":
+        return now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+    return None
 
 
 class FinanceService:
@@ -21,47 +39,51 @@ class FinanceService:
         )
         return round(total_income - total_expense, 3)
 
-    def get_income_summary(self, user_id):
-        return (
+    def get_income_summary(self, user_id, period: Optional[str] = None):
+        since = _period_start(period)
+        q = (
             self.session.query(
                 func.sum(Income.Amount).label("TotalIncome"),
                 IncomeCategory.CategoryName,
             )
             .join(IncomeCategory, Income.CategoryID == IncomeCategory.CategoryID)
             .filter(Income.UserID == user_id)
-            .group_by(IncomeCategory.CategoryID, IncomeCategory.CategoryName)
-            .all()
         )
+        if since:
+            q = q.filter(Income.created_at >= since)
+        return q.group_by(IncomeCategory.CategoryID, IncomeCategory.CategoryName).all()
 
-    def get_expense_summary(self, user_id):
-        return (
+    def get_expense_summary(self, user_id, period: Optional[str] = None):
+        since = _period_start(period)
+        q = (
             self.session.query(
                 func.sum(Expense.Amount).label("TotalExpense"),
                 ExpenseCategory.CategoryName,
             )
             .join(ExpenseCategory, Expense.CategoryID == ExpenseCategory.CategoryID)
             .filter(Expense.UserID == user_id)
-            .group_by(ExpenseCategory.CategoryID, ExpenseCategory.CategoryName)
-            .all()
         )
+        if since:
+            q = q.filter(Expense.created_at >= since)
+        return q.group_by(ExpenseCategory.CategoryID, ExpenseCategory.CategoryName).all()
 
-    def get_recent_transactions(self, user_id, limit=20):
-        incomes = (
+    def get_recent_transactions(self, user_id, limit=100, period: Optional[str] = None):
+        since = _period_start(period)
+        income_q = (
             self.session.query(Income, IncomeCategory.CategoryName)
             .outerjoin(IncomeCategory)
             .filter(Income.UserID == user_id)
-            .order_by(Income.created_at.desc())
-            .limit(limit)
-            .all()
         )
-        expenses = (
+        expense_q = (
             self.session.query(Expense, ExpenseCategory.CategoryName)
             .outerjoin(ExpenseCategory)
             .filter(Expense.UserID == user_id)
-            .order_by(Expense.created_at.desc())
-            .limit(limit)
-            .all()
         )
+        if since:
+            income_q = income_q.filter(Income.created_at >= since)
+            expense_q = expense_q.filter(Expense.created_at >= since)
+        incomes = income_q.order_by(Income.created_at.desc()).limit(limit).all()
+        expenses = expense_q.order_by(Expense.created_at.desc()).limit(limit).all()
         rows = []
         for inc, cat_name in incomes:
             rows.append({

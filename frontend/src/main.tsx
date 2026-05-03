@@ -9,10 +9,12 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import "./styles.css";
 
-// Listen for Supabase OAuth sessions (returned after Google/GitHub redirect)
-supabase.auth.onAuthStateChange((_event, session) => {
+// Sync Supabase OAuth session with the local auth store
+supabase.auth.onAuthStateChange((event, session) => {
   if (session?.access_token) {
     useAuth.getState().setToken(session.access_token);
+  } else if (event === "SIGNED_OUT") {
+    useAuth.getState().logout();
   }
 });
 

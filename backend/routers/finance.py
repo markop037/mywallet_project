@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from dependencies import get_current_user, get_db
 from models.finance import ExpenseCategory, IncomeCategory
@@ -45,14 +45,20 @@ def get_balance(
     return BalanceResponse(balance=svc.calculate_net_balance(current_user.UserID))
 
 
+VALID_PERIODS = {"day", "week", "month", "year"}
+
+
 @router.get("/transactions", response_model=List[TransactionOut])
 def list_transactions(
-    limit: int = 20,
+    limit: int = 100,
+    period: Optional[str] = Query(default=None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    if period and period not in VALID_PERIODS:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid period.")
     svc = FinanceService(db)
-    return svc.get_recent_transactions(current_user.UserID, limit=limit)
+    return svc.get_recent_transactions(current_user.UserID, limit=limit, period=period)
 
 
 @router.post("/incomes", status_code=status.HTTP_201_CREATED)
@@ -108,23 +114,29 @@ def delete_transaction(
 
 @router.get("/summary/incomes", response_model=List[SummaryItem])
 def income_summary(
+    period: Optional[str] = Query(default=None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    if period and period not in VALID_PERIODS:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid period.")
     svc = FinanceService(db)
     return [
         SummaryItem(category=cat, total=total)
-        for total, cat in svc.get_income_summary(current_user.UserID)
+        for total, cat in svc.get_income_summary(current_user.UserID, period=period)
     ]
 
 
 @router.get("/summary/expenses", response_model=List[SummaryItem])
 def expense_summary(
+    period: Optional[str] = Query(default=None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    if period and period not in VALID_PERIODS:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid period.")
     svc = FinanceService(db)
     return [
         SummaryItem(category=cat, total=total)
-        for total, cat in svc.get_expense_summary(current_user.UserID)
+        for total, cat in svc.get_expense_summary(current_user.UserID, period=period)
     ]

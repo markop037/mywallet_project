@@ -32,17 +32,22 @@ export interface AddExpensePayload {
   description?: string;
 }
 
+export type Period = "day" | "week" | "month" | "year" | "all";
+
+const periodParam = (period: Period) =>
+  period !== "all" ? `?period=${period}` : "";
+
 export const getBalance = (token: string) =>
   API.get<{ balance: number }>("/finance/balance", authHeaders(token));
 
-export const getTransactions = (token: string, limit = 20) =>
-  API.get<Transaction[]>(`/finance/transactions?limit=${limit}`, authHeaders(token));
+export const getTransactions = (token: string, period: Period = "all") =>
+  API.get<Transaction[]>(`/finance/transactions${periodParam(period)}`, authHeaders(token));
 
-export const getIncomeSummary = (token: string) =>
-  API.get<SummaryItem[]>("/finance/summary/incomes", authHeaders(token));
+export const getIncomeSummary = (token: string, period: Period = "all") =>
+  API.get<SummaryItem[]>(`/finance/summary/incomes${periodParam(period)}`, authHeaders(token));
 
-export const getExpenseSummary = (token: string) =>
-  API.get<SummaryItem[]>("/finance/summary/expenses", authHeaders(token));
+export const getExpenseSummary = (token: string, period: Period = "all") =>
+  API.get<SummaryItem[]>(`/finance/summary/expenses${periodParam(period)}`, authHeaders(token));
 
 export const addIncome = (token: string, data: AddIncomePayload) =>
   API.post("/finance/incomes", data, authHeaders(token));

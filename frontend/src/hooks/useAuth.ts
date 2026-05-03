@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 interface AuthState {
   token: string | null;
@@ -6,8 +7,13 @@ interface AuthState {
   logout: () => void;
 }
 
-export const useAuth = create<AuthState>((set) => ({
-  token: null,
-  setToken: (token) => set({ token }),
-  logout: () => set({ token: null }),
-}));
+export const useAuth = create<AuthState>()(
+  persist(
+    (set) => ({
+      token: null,
+      setToken: (token) => set({ token }),
+      logout: () => set({ token: null }),
+    }),
+    { name: "mywallet-auth" }
+  )
+);
