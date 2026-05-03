@@ -10,11 +10,12 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import "./styles.css";
 
-// Sync Supabase OAuth session with the local auth store
-supabase.auth.onAuthStateChange((event, session) => {
-  if (session?.access_token) {
-    useAuth.getState().setToken(session.access_token);
-  } else if (event === "SIGNED_OUT") {
+// Clear local auth state when Supabase signs the user out.
+// Token storage is handled exclusively by LoginPage and AuthCallbackPage —
+// do NOT sync session.access_token here, as Supabase token refreshes would
+// overwrite the backend JWT and cause immediate 401 logouts.
+supabase.auth.onAuthStateChange((event) => {
+  if (event === "SIGNED_OUT") {
     useAuth.getState().logout();
   }
 });
