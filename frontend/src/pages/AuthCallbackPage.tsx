@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { exchangeGoogleToken } from "../api/auth";
 import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../lib/supabase";
 
@@ -8,10 +9,15 @@ export default function AuthCallbackPage() {
   const { setToken } = useAuth();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.access_token) {
-        setToken(session.access_token);
-        navigate("/dashboard", { replace: true });
+        try {
+          const res = await exchangeGoogleToken(session.access_token);
+          setToken(res.data.access_token);
+          navigate("/dashboard", { replace: true });
+        } catch {
+          navigate("/login", { replace: true });
+        }
       } else {
         navigate("/login", { replace: true });
       }

@@ -25,3 +25,6 @@ export const login = (data: LoginPayload) =>
 
 export const register = (data: RegisterPayload) =>
   API.post<{ message: string }>("/auth/register", data);
+
+export const exchangeGoogleToken = (supabaseToken: string) =>
+  API.post<TokenResponse>("/auth/google", { access_token: supabaseToken });

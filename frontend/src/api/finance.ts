@@ -1,6 +1,17 @@
 import axios from "axios";
+import { useAuth } from "../hooks/useAuth";
 
 const API = axios.create({ baseURL: import.meta.env.VITE_API_URL as string });
+
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      useAuth.getState().logout();
+    }
+    return Promise.reject(error);
+  }
+);
 
 const authHeaders = (token: string) => ({
   headers: { Authorization: `Bearer ${token}` },
