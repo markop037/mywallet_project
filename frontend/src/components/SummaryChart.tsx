@@ -48,7 +48,7 @@ export function SummaryChart({ data, title, type = "incomes" }: Props) {
             innerRadius={55}
             outerRadius={95}
             paddingAngle={2}
-            label={({ name, percent }) =>
+            label={({ percent }) =>
               percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ""
             }
             labelLine={false}
