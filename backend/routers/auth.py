@@ -1,8 +1,7 @@
 import os
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, status
-from jose import JWTError
-from jose import jwt as jose_jwt
 from sqlalchemy.orm import Session
 
 from dependencies import create_access_token, get_db
@@ -37,29 +36,40 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/google", response_model=TokenResponse)
-def google_auth(data: GoogleAuthRequest, db: Session = Depends(get_db)):
-    secret = os.environ.get("JWT_SECRET", "change-me-to-a-long-random-string")
-    try:
-        payload = jose_jwt.decode(
-            data.access_token,
-            secret,
-            algorithms=["HS256"],
-            options={"verify_aud": False},
+async def google_auth(data: GoogleAuthRequest, db: Session = Depends(get_db)):
+    supabase_url = os.environ.get("SUPABASE_URL", "").rstrip("/")
+    supabase_anon_key = os.environ.get("SUPABASE_ANON_KEY", "")
+
+    if not supabase_url or not supabase_anon_key:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Supabase environment variables not configured",
         )
-    except JWTError:
+
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            f"{supabase_url}/auth/v1/user",
+            headers={
+                "Authorization": f"Bearer {data.access_token}",
+                "apikey": supabase_anon_key,
+            },
+        )
+
+    if response.status_code != 200:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid Supabase token",
         )
 
-    email: str = payload.get("email", "")
+    user_data = response.json()
+    email: str = user_data.get("email", "")
     if not email:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="No email found in token",
+            detail="No email found in Supabase user",
         )
 
-    meta = payload.get("user_metadata") or {}
+    meta = user_data.get("user_metadata") or {}
     full_name = meta.get("full_name") or meta.get("name") or ""
 
     svc = AuthService(db)
